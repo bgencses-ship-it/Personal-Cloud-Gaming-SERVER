@@ -906,16 +906,42 @@ curl -s -X POST "${appOrigin}/api/wol/wake" \\
   -H "Content-Type: application/json" \\
   -d "{\\"macAddress\\":\\"$MAC_ADDR\\",\\"publicIpOrDdns\\":\\"$PUBLIC_IP\\",\\"wolPort\\":$WOL_PORT}" > /dev/null || true
 
-# 2. Moonlight Kurulu Değilse Otomatik Kur (SteamOS Flatpak)
+# 2. Steam Deck ve MacBook Üzerine "DeckPulse Kontrol Merkezi" Arayüz Kısayolu Kur
+if [ -d "$HOME/Desktop" ]; then
+  if [ "$(uname)" = "Darwin" ]; then
+    cat << 'EOF' > "$HOME/Desktop/DeckPulse Kontrol Paneli.command"
+#!/usr/bin/env bash
+open "${appOrigin}"
+EOF
+    chmod +x "$HOME/Desktop/DeckPulse Kontrol Paneli.command"
+    echo "[2/5] MacBook Masaüstüne 'DeckPulse Kontrol Paneli' kısayolu eklendi!"
+  else
+    cat << 'EOF' > "$HOME/Desktop/DeckPulse.desktop"
+[Desktop Entry]
+Name=DeckPulse Kontrol Merkezi
+Comment=Monitörsüz Oyun Kasası, Wake-on-LAN ve Apollo Ekran Kontrolü
+Exec=xdg-open ${appOrigin}
+Icon=applications-games
+Terminal=false
+Type=Application
+Categories=Game;
+EOF
+    chmod +x "$HOME/Desktop/DeckPulse.desktop"
+    cp "$HOME/Desktop/DeckPulse.desktop" "$HOME/.local/share/applications/DeckPulse.desktop" 2>/dev/null || true
+    echo "[2/5] Steam Deck Masaüstüne ve Uygulama Menüsüne 'DeckPulse Kontrol Merkezi' arayüzü eklendi!"
+  fi
+fi
+
+# 3. Moonlight Kurulu Değilse Otomatik Kur (SteamOS Flatpak)
 if command -v flatpak >/dev/null 2>&1; then
   if ! flatpak list | grep -q "com.moonlight_stream.Moonlight"; then
-    echo "[2/4] Moonlight Steam Deck'inize kuruluyor..."
+    echo "[3/5] Moonlight Steam Deck'inize kuruluyor..."
     flatpak install -y flathub com.moonlight_stream.Moonlight
   fi
 fi
 
-# 3. Evde miyiz (Yerel Ağ) yoksa İş Yerinde miyiz (Tünel) Otomatik Test Et
-echo "[3/4] Kasa bağlantısı kontrol ediliyor..."
+# 4. Evde miyiz (Yerel Ağ) yoksa İş Yerinde miyiz (Tünel) Otomatik Test Et
+echo "[4/5] Kasa bağlantısı kontrol ediliyor..."
 if ping -c 1 -W 2 "$LOCAL_IP" >/dev/null 2>&1; then
   TARGET_IP="$LOCAL_IP"
   echo " -> Aile Evi Yerel Ağı (LAN) algılandı! Hedef IP: $TARGET_IP (<1 ms)"
@@ -924,8 +950,8 @@ else
   echo " -> İş Yeri / Uzak Ağ algılandı! Güvenli P2P Tünel IP: $TARGET_IP"
 fi
 
-# 4. Moonlight'ı Doğrudan Tam Ekran Başlat
-echo "[4/4] Moonlight üzerinden $TARGET_IP adresindeki Apollo Sanal Ekranına bağlanılıyor..."
+# 5. Moonlight'ı Doğrudan Tam Ekran Başlat
+echo "[5/5] Moonlight üzerinden $TARGET_IP adresindeki Apollo Sanal Ekranına bağlanılıyor..."
 if command -v flatpak >/dev/null 2>&1; then
   flatpak run com.moonlight_stream.Moonlight stream "$TARGET_IP" "Steam Big Picture" || flatpak run com.moonlight_stream.Moonlight
 elif [ -d "/Applications/Moonlight.app" ]; then
