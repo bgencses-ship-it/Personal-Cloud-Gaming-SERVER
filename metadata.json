@@ -1,0 +1,6 @@
+{
+  "name": "DeckPulse — Kişisel GeForce NOW & Uzaktan Oyun Tüneli",
+  "description": "Evinizdeki oyun bilgisayarını uzaktan tek tuşla uyandırın (Wake-on-LAN), sıfır ayarla güvenli P2P tünel kurun ve Apollo/Moonlight veya WebRTC ile Steam Deck'inizden düşük gecikmeli yayın yapın.",
+  "requestFramePermissions": ["display-capture"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
